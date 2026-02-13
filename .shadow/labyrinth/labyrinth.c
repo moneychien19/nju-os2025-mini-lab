@@ -6,6 +6,8 @@
 #include <testkit.h>
 #include "labyrinth.h"
 
+void printUsage();
+
 int main(int argc, char *argv[]) {
     // TODO: Implement this function
     if (argc == 1) {

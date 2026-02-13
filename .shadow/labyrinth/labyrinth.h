@@ -14,6 +14,7 @@ typedef struct {
 } Position;
 
 
+void printUsage();
 bool isValidPlayer(char playerId);
 bool loadMap(Labyrinth *labyrinth, const char *filename);
 Position findPlayer(Labyrinth *labyrinth, char playerId);
@@ -22,3 +23,4 @@ bool isEmptySpace(Labyrinth *labyrinth, int row, int col);
 bool movePlayer(Labyrinth *labyrinth, char playerId, const char *direction);
 bool saveMap(Labyrinth *labyrinth, const char *filename);
 bool isConnected(Labyrinth *labyrinth);
+void showVersion();

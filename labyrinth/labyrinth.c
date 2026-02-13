@@ -6,8 +6,24 @@
 #include <testkit.h>
 #include "labyrinth.h"
 
+void printUsage();
+void showVersion();
+
 int main(int argc, char *argv[]) {
     // TODO: Implement this function
+    if (argc == 1) {
+        printUsage();
+        return 0;
+    }
+
+    if (strcmp(argv[1], "--version") == 0) {
+        if (argc != 2) {
+            return 1;
+        }
+        showVersion();
+        return 0;
+    }
+
     return 0;
 }
 
@@ -64,4 +80,8 @@ void dfs(Labyrinth *labyrinth, int row, int col, bool visited[MAX_ROWS][MAX_COLS
 bool isConnected(Labyrinth *labyrinth) {
     // TODO: Implement this function
     return false;
+}
+
+void showVersion() {
+    printf("Labyrinth Game Version 1.0\n");   
 }

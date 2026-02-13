@@ -62,7 +62,6 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
     // 如果迷宫过大，退出并返回错误码 1
 
     char buffer[MAX_COLS + 2]; // +2 for newline and null terminator
-    char map[MAX_ROWS][MAX_COLS];
 
     int row = 0;
     while (fgets(buffer, sizeof(buffer), f) != NULL) {

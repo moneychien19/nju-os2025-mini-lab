@@ -7,11 +7,20 @@
 #include "labyrinth.h"
 
 void printUsage();
+void showVersion();
 
 int main(int argc, char *argv[]) {
     // TODO: Implement this function
     if (argc == 1) {
         printUsage();
+        return 0;
+    }
+
+    if (argv[1] == "--version") {
+        if (argc != 2) {
+            return 1;
+        }
+        showVersion();
         return 0;
     }
 
@@ -24,6 +33,10 @@ void printUsage() {
     printf("  labyrinth -m map.txt -p id\n");
     printf("  labyrinth --map map.txt --player id --move direction\n");
     printf("  labyrinth --version\n");
+}
+
+void showVersion() {
+    printf("Labyrinth Game Version 1.0\n");   
 }
 
 bool isValidPlayer(char playerId) {

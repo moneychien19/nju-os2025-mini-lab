@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "--map") == 0 || strcmp(argv[1], "-m") == 0) {
         const char *filename = argv[2];
         const char *filepath = malloc(strlen("maps/") + strlen(filename) + 1);
+        sprintf((char *)filepath, "maps/%s", filename);
 
         Labyrinth labyrinth;
         loadMap(&labyrinth, filepath);
@@ -31,7 +32,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < labyrinth.rows; i++) {
             printf("%s", labyrinth.map[i]);
         }
-        
+
         free((void *)filepath);
     }
 

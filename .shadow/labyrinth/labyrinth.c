@@ -8,6 +8,11 @@
 
 int main(int argc, char *argv[]) {
     // TODO: Implement this function
+    if (argc == 1) {
+        printUsage();
+        return 0;
+    }
+
     return 0;
 }
 

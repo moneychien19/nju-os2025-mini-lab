@@ -208,7 +208,7 @@ void dfs(Labyrinth *labyrinth, int row, int col, bool visited[MAX_ROWS][MAX_COLS
         int newCol = col + directions[i].col;
 
         if (newRow >= 0 && newRow < labyrinth->rows && newCol >= 0 && newCol < labyrinth->cols) {
-            if (!visited[newRow][newCol] && labyrinth->map[newRow][newCol] == '.') {
+            if (!visited[newRow][newCol] && labyrinth->map[newRow][newCol] != '#') {
                 visited[newRow][newCol] = true;
                 dfs(labyrinth, newRow, newCol, visited);
             }
@@ -220,6 +220,10 @@ bool isConnected(Labyrinth *labyrinth) {
     bool visited[MAX_ROWS][MAX_COLS] = {{ false }};
 
     Position start = findFirstEmptySpace(labyrinth);
+    if (start.row == -1 || start.col == -1) {
+        return false;
+    }
+
     dfs(labyrinth, start.row, start.col, visited);
 
     for (int i = 0; i < labyrinth->rows; i++) {
@@ -234,5 +238,5 @@ bool isConnected(Labyrinth *labyrinth) {
 }
 
 void showVersion() {
-    printf("Labyrinth Game Version 1.0\n");   
+    printf("%s Version 1.0\n", VERSION_INFO);
 }

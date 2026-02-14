@@ -22,18 +22,33 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "--map") == 0 || strcmp(argv[1], "-m") == 0) {
-        const char *filename = argv[2];
-        const char *filepath = malloc(strlen("maps/") + strlen(filename) + 1);
-        sprintf((char *)filepath, "maps/%s", filename);
-
-        Labyrinth labyrinth;
-        loadMap(&labyrinth, filepath);
-
-        for (int i = 0; i < labyrinth.rows; i++) {
-            printf("%s", labyrinth.map[i]);
+        if (argc < 3) {
+            return 1;
         }
 
-        free((void *)filepath);
+        const char *filename = argv[2];
+
+        Labyrinth labyrinth;
+        bool success = loadMap(&labyrinth, filename);
+
+        if (!success) {
+            return 1;
+        }
+
+        for (int i = 0; i < labyrinth.rows; i++) {
+            printf("%s\n", labyrinth.map[i]);
+        }
+    }
+
+    if (strcmp(argv[3], "--player") == 0 || strcmp(argv[3], "-p") == 0) {
+        if (argc < 5) {
+            return 1;
+        }
+
+        char playerId = argv[4][0];
+        if (!isValidPlayer(playerId)) {
+            return 1;
+        }
     }
 
     return 0;
@@ -49,6 +64,10 @@ void printUsage() {
 
 bool isValidPlayer(char playerId) {
     // TODO: Implement this function
+    if (playerId >= '0' && playerId <= '9') {
+        return true;
+    }
+
     return false;
 }
 
@@ -64,20 +83,25 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
     // 如果玩家 ID 无效 (不在 0-9 范围内)，退出并返回错误码 1
     // 如果缺少任何必需参数，退出并返回错误码 1
     // 如果迷宫中的所有空地不连通，退出并返回错误码 1
-    // 如果迷宫过大，退出并返回错误码 1
 
     char buffer[MAX_COLS + 2]; // +2 for newline and null terminator
 
     int row = 0;
-    while (fgets(buffer, sizeof(buffer), f) != NULL) {
-        labyrinth->map[row][0] = '\0'; // Initialize the row
-        strncat(labyrinth->map[row], buffer, MAX_COLS);
+    while (fgets(buffer, sizeof(buffer), f) != NULL && row < MAX_ROWS) {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        strncpy(labyrinth->map[row], buffer, MAX_COLS);
+        labyrinth->map[row][MAX_COLS - 1] = '\0'; // ensure null-terminated
         row++;
     }
     labyrinth->rows = row;
-    labyrinth->cols = strlen(buffer) - 1; // Exclude newline
+    labyrinth->cols = (row > 0) ? strlen(labyrinth->map[0]) : 0;
 
     fclose(f);
+
+    // 如果迷宫过大，退出并返回错误码 1
+    if (labyrinth->cols > MAX_COLS || labyrinth->rows > MAX_ROWS) {
+        return false;
+    }
 
     return true;
 }

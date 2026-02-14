@@ -154,8 +154,8 @@ bool movePlayer(Labyrinth *labyrinth, char playerId, const char *direction) {
     Position position = findPlayer(labyrinth, playerId);
 
     if (position.row == -1 || position.col == -1) {
-        Position placedPosition = findFirstEmptySpace(labyrinth);
-        labyrinth->map[placedPosition.row][placedPosition.col] = playerId;
+        position = findFirstEmptySpace(labyrinth);
+        labyrinth->map[position.row][position.col] = playerId;
     }
 
     if (strcmp(direction, "up") == 0) {

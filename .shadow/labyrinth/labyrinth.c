@@ -217,7 +217,7 @@ void dfs(Labyrinth *labyrinth, int row, int col, bool visited[MAX_ROWS][MAX_COLS
 }
 
 bool isConnected(Labyrinth *labyrinth) {
-    bool visited[MAX_ROWS][MAX_COLS] = { false };
+    bool visited[MAX_ROWS][MAX_COLS] = {{ false }};
 
     Position start = findFirstEmptySpace(labyrinth);
     dfs(labyrinth, start.row, start.col, visited);

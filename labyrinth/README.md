@@ -22,3 +22,4 @@ TK_RUN=1 ./labyrinth
   - `argc` = argument count
   - `argv` = argument vector (an array of strings, one per argument)
   - e.g. If I run `./labyrinth --map test.map --player 1 --move right`, the `argv` will contain 7 elements (include `./labyrinth`). Therefore, `argc` = 7.
+- `.h` is the header file in C. It is mostly used to define data structures and declare APIs.

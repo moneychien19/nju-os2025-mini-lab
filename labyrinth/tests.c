@@ -45,6 +45,24 @@ SystemTest(test_basic_move,
     tk_assert(result->exit_status == 0, "Must exit 0");
 }
 
+// Test map and player arguments without movement
+SystemTest(test_map_and_player,
+    ((const char *[]){ "--map", "test.map", "--player", "1" }),
+    .init = setup_test_map,
+    .fini = cleanup_test_map) {
+    tk_assert(result->exit_status == 0, "Must exit 0");
+    tk_assert(strstr(result->output, "....") != NULL, "Should print the map");
+}
+
+// Test map and player arguments without movement (arguments in different order)
+SystemTest(test_map_and_player_different_order,
+    ((const char *[]){ "--player", "1", "--map", "test.map" }),
+    .init = setup_test_map,
+    .fini = cleanup_test_map) {
+    tk_assert(result->exit_status == 0, "Must exit 0");
+    tk_assert(strstr(result->output, "....") != NULL, "Should print the map");
+}
+
 // Test invalid move direction
 SystemTest(test_invalid_move,
     ((const char *[]){ "--map", "test.map", "--player", "1", "--move", "invalid" })) {

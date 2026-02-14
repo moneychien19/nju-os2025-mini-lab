@@ -7,7 +7,6 @@
 #include "labyrinth.h"
 
 int main(int argc, char *argv[]) {
-    // TODO: Implement this function
     if (argc == 1) {
         printUsage();
         return 0;
@@ -106,6 +105,9 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
     }
 
     // 如果迷宫中的所有空地不连通，退出并返回错误码 1
+    if (!isConnected(labyrinth)) {
+        return false;
+    }
 
     return true;
 }
@@ -194,12 +196,45 @@ bool saveMap(Labyrinth *labyrinth, const char *filename) {
 
 // Check if all empty spaces are connected using DFS
 void dfs(Labyrinth *labyrinth, int row, int col, bool visited[MAX_ROWS][MAX_COLS]) {
-    // TODO: Implement this function
+    Position directions[4] = {
+        { -1, 0 }, // up
+        { 1, 0 },  // down
+        { 0, -1 }, // left
+        { 0, 1 }   // right
+    };
+
+    for (int i = 0; i < 4; i++) {
+        int newRow = row + directions[i].row;
+        int newCol = col + directions[i].col;
+
+        if (newRow >= 0 && newRow < labyrinth->rows && newCol >= 0 && newCol < labyrinth->cols) {
+            if (!visited[newRow][newCol] && labyrinth->map[newRow][newCol] != '#') {
+                visited[newRow][newCol] = true;
+                dfs(labyrinth, newRow, newCol, visited);
+            }
+        }
+    }
 }
 
 bool isConnected(Labyrinth *labyrinth) {
-    // TODO: Implement this function
-    return false;
+    bool visited[MAX_ROWS][MAX_COLS] = {{ false }};
+
+    Position start = findFirstEmptySpace(labyrinth);
+    if (start.row == -1 || start.col == -1) {
+        return false;
+    }
+    
+    dfs(labyrinth, start.row, start.col, visited);
+
+    for (int i = 0; i < labyrinth->rows; i++) {
+        for (int j = 0; j < labyrinth->cols; j++) {
+            if (labyrinth->map[i][j] != '#' && !visited[i][j]) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void showVersion() {

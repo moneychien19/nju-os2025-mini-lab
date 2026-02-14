@@ -54,6 +54,9 @@ int main(int argc, char *argv[]) {
             if (!movePlayer(&labyrinth, playerId[0], direction)) {
                 return 1;
             }
+            if (!saveMap(&labyrinth, filename)) {
+                return 1;
+            }
         }
     }
 
@@ -190,8 +193,17 @@ bool movePlayer(Labyrinth *labyrinth, char playerId, const char *direction) {
 }
 
 bool saveMap(Labyrinth *labyrinth, const char *filename) {
-    // TODO: Implement this function
-    return false;
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        return false;
+    }
+
+    for (int i = 0; i < labyrinth->rows; i++) {
+        fprintf(file, "%s\n", labyrinth->map[i]);
+    }
+
+    fclose(file);
+    return true;
 }
 
 // Check if all empty spaces are connected using DFS

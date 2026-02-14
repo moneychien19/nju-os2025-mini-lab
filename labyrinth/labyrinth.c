@@ -23,7 +23,8 @@ int main(int argc, char *argv[]) {
 
     char *filename = NULL;
     char *playerId = NULL;
-    // char *direction = NULL;
+    char *direction = NULL;
+    Labyrinth labyrinth;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--map") == 0 || strcmp(argv[i], "-m") == 0) {
@@ -31,14 +32,13 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "--player") == 0 || strcmp(argv[i], "-p") == 0) {
             playerId = argv[++i];
         } else if (strcmp(argv[i], "--move") == 0 || strcmp(argv[i], "-mv") == 0) {
-            // direction = argv[++i];
+            direction = argv[++i];
         } else {
             return 1;
         }
     }
 
     if (filename != NULL && playerId != NULL) {
-        Labyrinth labyrinth;
         bool loadMapSuccess = loadMap(&labyrinth, filename);
         if (!loadMapSuccess) {
             return 1;
@@ -49,6 +49,12 @@ int main(int argc, char *argv[]) {
 
         for (int i = 0; i < labyrinth.rows; i++) {
             printf("%s\n", labyrinth.map[i]);
+        }
+        
+        if (direction != NULL) {
+            if (!movePlayer(&labyrinth, playerId[0], direction)) {
+                return 1;
+            }
         }
     }
 
@@ -105,24 +111,79 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
 }
 
 Position findPlayer(Labyrinth *labyrinth, char playerId) {
-    // TODO: Implement this function
     Position pos = {-1, -1};
+
+    for (int i = 0; i < labyrinth->rows; i++) {
+        for (int j = 0; j < labyrinth->cols; j++) {
+            if (labyrinth->map[i][j] == playerId) {
+                pos.row = i;
+                pos.col = j;
+                return pos;
+            }
+        }
+    }
+
     return pos;
 }
 
 Position findFirstEmptySpace(Labyrinth *labyrinth) {
-    // TODO: Implement this function
     Position pos = {-1, -1};
+
+    for (int i = 0; i < labyrinth->rows; i++) {
+        for (int j = 0; j < labyrinth->cols; j++) {
+            if (labyrinth->map[i][j] == '.') {
+                pos.row = i;
+                pos.col = j;
+                return pos;
+            }
+        }
+    }
+
     return pos;
 }
 
 bool isEmptySpace(Labyrinth *labyrinth, int row, int col) {
-    // TODO: Implement this function
-    return false;
+    if (row < 0 || row >= labyrinth->rows || col < 0 || col >= labyrinth->cols) {
+        return false;
+    }
+
+    return labyrinth->map[row][col] == '.';
 }
 
 bool movePlayer(Labyrinth *labyrinth, char playerId, const char *direction) {
-    // TODO: Implement this function
+    Position position = findPlayer(labyrinth, playerId);
+
+    if (position.row == -1 || position.col == -1) {
+        position = findFirstEmptySpace(labyrinth);
+        labyrinth->map[position.row][position.col] = playerId;
+    }
+
+    if (strcmp(direction, "up") == 0) {
+        if (position.row > 0 && isEmptySpace(labyrinth, position.row - 1, position.col)) {
+            labyrinth->map[position.row][position.col] = '.';
+            labyrinth->map[position.row - 1][position.col] = playerId;
+            return true;
+        }
+    } else if (strcmp(direction, "down") == 0) {
+        if (position.row < labyrinth->rows - 1 && isEmptySpace(labyrinth, position.row + 1, position.col)) {
+            labyrinth->map[position.row][position.col] = '.';
+            labyrinth->map[position.row + 1][position.col] = playerId;
+            return true;
+        }
+    } else if (strcmp(direction, "left") == 0) {
+        if (position.col > 0 && isEmptySpace(labyrinth, position.row, position.col - 1)) {
+            labyrinth->map[position.row][position.col] = '.';
+            labyrinth->map[position.row][position.col - 1] = playerId;
+            return true;
+        }
+    } else if (strcmp(direction, "right") == 0) {
+        if (position.col < labyrinth->cols - 1 && isEmptySpace(labyrinth, position.row, position.col + 1)) {
+            labyrinth->map[position.row][position.col] = '.';
+            labyrinth->map[position.row][position.col + 1] = playerId;
+            return true;
+        }
+    }
+
     return false;
 }
 

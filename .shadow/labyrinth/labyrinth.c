@@ -123,10 +123,7 @@ Position findPlayer(Labyrinth *labyrinth, char playerId) {
         }
     }
 
-    Position placedPosition = findFirstEmptySpace(labyrinth);
-    labyrinth->map[placedPosition.row][placedPosition.col] = playerId;
-
-    return placedPosition;
+    return pos;
 }
 
 Position findFirstEmptySpace(Labyrinth *labyrinth) {

@@ -27,33 +27,41 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--map") == 0 || strcmp(argv[i], "-m") == 0) {
+            if (i + 1 >= argc) return 1;
             filename = argv[++i];
         } else if (strcmp(argv[i], "--player") == 0 || strcmp(argv[i], "-p") == 0) {
+            if (i + 1 >= argc) return 1;
             playerId = argv[++i];
         } else if (strcmp(argv[i], "--move") == 0 || strcmp(argv[i], "-mv") == 0) {
+            if (i + 1 >= argc) return 1;
             direction = argv[++i];
         } else {
             return 1;
         }
     }
 
-    if (filename != NULL && playerId != NULL) {
-        bool loadMapSuccess = loadMap(&labyrinth, filename);
-        if (!loadMapSuccess) {
-            return 1;
-        }
-        if (!isValidPlayer(playerId[0])) {
-            return 1;
-        }
+    if (filename == NULL || playerId == NULL) {
+        return 1;
+    }
 
-        for (int i = 0; i < labyrinth.rows; i++) {
-            printf("%s\n", labyrinth.map[i]);
+    bool loadMapSuccess = loadMap(&labyrinth, filename);
+    if (!loadMapSuccess) {
+        return 1;
+    }
+    if (!isValidPlayer(playerId[0])) {
+        return 1;
+    }
+
+    for (int i = 0; i < labyrinth.rows; i++) {
+        printf("%s\n", labyrinth.map[i]);
+    }
+
+    if (direction != NULL) {
+        if (!movePlayer(&labyrinth, playerId[0], direction)) {
+            return 1;
         }
-        
-        if (direction != NULL) {
-            if (!movePlayer(&labyrinth, playerId[0], direction)) {
-                return 1;
-            }
+        if (!saveMap(&labyrinth, filename)) {
+            return 1;
         }
     }
 
@@ -69,18 +77,12 @@ void printUsage() {
 }
 
 bool isValidPlayer(char playerId) {
-    if (playerId >= '0' && playerId <= '9') {
-        return true;
-    }
-
-    return false;
+    return (playerId >= '0' && playerId <= '9');
 }
 
 bool loadMap(Labyrinth *labyrinth, const char *filename) {
-    // TODO: Implement this function
     FILE *f = fopen(filename, "r");
 
-    // 如果地图文件不存在或格式不正确，退出并返回错误码 1
     if (f == NULL) {
         return false;
     }
@@ -99,12 +101,10 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
 
     fclose(f);
 
-    // 如果迷宫过大，退出并返回错误码 1
     if (labyrinth->cols > MAX_COLS || labyrinth->rows > MAX_ROWS) {
         return false;
     }
 
-    // 如果迷宫中的所有空地不连通，退出并返回错误码 1
     if (!isConnected(labyrinth)) {
         return false;
     }
@@ -190,8 +190,17 @@ bool movePlayer(Labyrinth *labyrinth, char playerId, const char *direction) {
 }
 
 bool saveMap(Labyrinth *labyrinth, const char *filename) {
-    // TODO: Implement this function
-    return false;
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        return false;
+    }
+
+    for (int i = 0; i < labyrinth->rows; i++) {
+        fprintf(file, "%s\n", labyrinth->map[i]);
+    }
+
+    fclose(file);
+    return true;
 }
 
 // Check if all empty spaces are connected using DFS
@@ -202,6 +211,8 @@ void dfs(Labyrinth *labyrinth, int row, int col, bool visited[MAX_ROWS][MAX_COLS
         { 0, -1 }, // left
         { 0, 1 }   // right
     };
+
+    visited[row][col] = true;
 
     for (int i = 0; i < 4; i++) {
         int newRow = row + directions[i].row;
@@ -223,7 +234,7 @@ bool isConnected(Labyrinth *labyrinth) {
     if (start.row == -1 || start.col == -1) {
         return false;
     }
-    
+
     dfs(labyrinth, start.row, start.col, visited);
 
     for (int i = 0; i < labyrinth->rows; i++) {
@@ -238,5 +249,5 @@ bool isConnected(Labyrinth *labyrinth) {
 }
 
 void showVersion() {
-    printf("Labyrinth Game Version 1.0\n");   
+    printf("%s Version 1.0\n", VERSION_INFO);
 }

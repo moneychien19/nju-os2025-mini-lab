@@ -9,6 +9,13 @@ make
 ./labyrinth
 ```
 
+## Run with Frontend
+
+```bash
+make
+python3 frontend/hotseat.py --map maps/map.txt
+```
+
 ## Test
 
 ```bash

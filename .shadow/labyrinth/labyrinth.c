@@ -21,33 +21,34 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (strcmp(argv[1], "--map") == 0 || strcmp(argv[1], "-m") == 0) {
-        if (argc < 3) {
+    char *filename = NULL;
+    char *playerId = NULL;
+    char *direction = NULL;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--map") == 0 || strcmp(argv[i], "-m") == 0) {
+            filename = argv[++i];
+        } else if (strcmp(argv[i], "--player") == 0 || strcmp(argv[i], "-p") == 0) {
+            playerId = argv[++i];
+        } else if (strcmp(argv[i], "--move") == 0 || strcmp(argv[i], "-mv") == 0) {
+            direction = argv[++i];
+        } else {
             return 1;
         }
+    }
 
-        const char *filename = argv[2];
-
+    if (filename != NULL && playerId != NULL) {
         Labyrinth labyrinth;
-        bool success = loadMap(&labyrinth, filename);
-
-        if (!success) {
+        bool loadMapSuccess = loadMap(&labyrinth, filename);
+        if (!loadMapSuccess) {
+            return 1;
+        }
+        if (!isValidPlayer(playerId[0])) {
             return 1;
         }
 
         for (int i = 0; i < labyrinth.rows; i++) {
             printf("%s\n", labyrinth.map[i]);
-        }
-    }
-
-    if (strcmp(argv[3], "--player") == 0 || strcmp(argv[3], "-p") == 0) {
-        if (argc < 5) {
-            return 1;
-        }
-
-        char playerId = argv[4][0];
-        if (!isValidPlayer(playerId)) {
-            return 1;
         }
     }
 
@@ -63,7 +64,6 @@ void printUsage() {
 }
 
 bool isValidPlayer(char playerId) {
-    // TODO: Implement this function
     if (playerId >= '0' && playerId <= '9') {
         return true;
     }
@@ -80,10 +80,8 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
         return false;
     }
 
-    // 如果玩家 ID 无效 (不在 0-9 范围内)，退出并返回错误码 1
     // 如果缺少任何必需参数，退出并返回错误码 1
-    // 如果迷宫中的所有空地不连通，退出并返回错误码 1
-
+    
     char buffer[MAX_COLS + 2]; // +2 for newline and null terminator
 
     int row = 0;
@@ -102,6 +100,8 @@ bool loadMap(Labyrinth *labyrinth, const char *filename) {
     if (labyrinth->cols > MAX_COLS || labyrinth->rows > MAX_ROWS) {
         return false;
     }
+
+    // 如果迷宫中的所有空地不连通，退出并返回错误码 1
 
     return true;
 }

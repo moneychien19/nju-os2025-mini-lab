@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
     char *filename = NULL;
     char *playerId = NULL;
-    char *direction = NULL;
+    // char *direction = NULL;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--map") == 0 || strcmp(argv[i], "-m") == 0) {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "--player") == 0 || strcmp(argv[i], "-p") == 0) {
             playerId = argv[++i];
         } else if (strcmp(argv[i], "--move") == 0 || strcmp(argv[i], "-mv") == 0) {
-            direction = argv[++i];
+            // direction = argv[++i];
         } else {
             return 1;
         }

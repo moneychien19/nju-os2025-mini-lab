@@ -8,9 +8,9 @@
 #include "pstree.h"
 
 int main(int argc, char *argvp[]) {
-  if (argc == 1) {
-    return 0;
-  }
+  // if (argc == 1) {
+  //   return 0;
+  // }
   
   int* pids = get_all_pids();
   for (size_t i = 0; pids[i] != 0; i++) {
@@ -60,6 +60,7 @@ int* get_all_pids() {
       pids = new_pids;
     }
     pids[n++] = pid;
+    pids[n] = 0; // 以 0 作為結束標誌
   }
 
   closedir(d);

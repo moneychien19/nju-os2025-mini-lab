@@ -4,7 +4,7 @@ typedef struct {
   char comm[256];
 } ProcessInfo;
 
-typedef struct {
+typedef struct ProcessNode {
   ProcessInfo info;
   struct ProcessNode **children;
   size_t child_count;

@@ -7,6 +7,13 @@
 
 #include "pstree.h"
 
+static char* find_comm(const char *stat_buf);
+static int find_ppid(const char *stat_buf);
+static int is_all_digits(const char *s);
+static int get_max_pid();
+static void add_child(ProcessNode *parent, ProcessNode *child);
+static int cmp_by_pid(const void *a, const void *b);
+
 int main(int argc, char *argvp[]) {
   int show_pids = 0;
   int numeric_sort = 0;
@@ -142,12 +149,6 @@ ProcessNode* build_tree(int *pids) {
   return &nodes[1];
 }
 
-static int cmp_by_pid(const void *a, const void *b) {
-  ProcessNode *pa = *(ProcessNode **)a;
-  ProcessNode *pb = *(ProcessNode **)b;
-  return pa->info.pid - pb->info.pid;
-}
-
 void print_tree(ProcessNode *node, int show_pids, int numeric_sort, const char *prefix, int is_last) {
   if (!node) return;
 
@@ -174,7 +175,7 @@ void print_tree(ProcessNode *node, int show_pids, int numeric_sort, const char *
   }
 }
 
-char* find_comm(const char *stat_buf) {
+static char* find_comm(const char *stat_buf) {
   const char *start = strchr(stat_buf, '(');
   const char *end = strrchr(stat_buf, ')');
   if (!start || !end || end <= start) {
@@ -193,7 +194,7 @@ char* find_comm(const char *stat_buf) {
   return comm;
 }
 
-int find_ppid(const char *stat_buf) {
+static int find_ppid(const char *stat_buf) {
   const char *end = strrchr(stat_buf, ')');
   if (!end) {
     return -1;
@@ -204,7 +205,7 @@ int find_ppid(const char *stat_buf) {
   return ppid;
 }
 
-int is_all_digits(const char *s) {
+static int is_all_digits(const char *s) {
   if (!s || !*s) {
     return 0;
   }
@@ -218,7 +219,7 @@ int is_all_digits(const char *s) {
   return 1;
 }
 
-int get_max_pid() {
+static int get_max_pid() {
   FILE *f = fopen("/proc/sys/kernel/pid_max", "r");
   if (!f) {
     return -1;
@@ -234,7 +235,7 @@ int get_max_pid() {
   return max_pid;
 }
 
-void add_child(ProcessNode *parent, ProcessNode *child) {
+static void add_child(ProcessNode *parent, ProcessNode *child) {
   if (parent->child_count >= parent->child_cap) {
     size_t new_cap = parent->child_cap == 0 ? 4 : parent->child_cap * 2;
     ProcessNode **new_children = realloc(parent->children, new_cap * sizeof(ProcessNode*));
@@ -248,4 +249,10 @@ void add_child(ProcessNode *parent, ProcessNode *child) {
   }
   
   parent->children[parent->child_count++] = child;
+}
+
+static int cmp_by_pid(const void *a, const void *b) {
+  ProcessNode *pa = *(ProcessNode **)a;
+  ProcessNode *pb = *(ProcessNode **)b;
+  return pa->info.pid - pb->info.pid;
 }

@@ -7,7 +7,7 @@ Mini lab assignments for [NJU Operating Systems course (2025 Spring)](https://jy
 | Module | Lab Name  | Requirement                                   | Status |
 | ------ | --------- | --------------------------------------------- | ------ |
 | M1     | labyrinth | [Link](https://jyywiki.cn/OS/2025/labs/M1.md) | Done   |
-| M2     | pstree    | [Link](https://jyywiki.cn/OS/2025/labs/M2.md) |        |
+| M2     | pstree    | [Link](https://jyywiki.cn/OS/2025/labs/M2.md) | Done   |
 | M3     | sperf     | TBD                                           |        |
 | M4     | crepl     | TBD                                           |        |
 | M5     | mymalloc  | TBD                                           |        |

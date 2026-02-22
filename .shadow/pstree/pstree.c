@@ -172,8 +172,9 @@ int find_ppid(const char *stat_buf) {
     return -1;
   }
 
-  const char *ppid_str = end + 2;
-  return atoi(ppid_str);
+  int ppid;
+  sscanf(end + 2, "%*c %d", &ppid);
+  return ppid;
 }
 
 int is_all_digits(const char *s) {

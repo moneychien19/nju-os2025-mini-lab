@@ -8,13 +8,26 @@
 #include "pstree.h"
 
 int main(int argc, char *argvp[]) {
-  // if (argc == 1) {
-  //   return 0;
-  // }
-  
+  int show_pids = 0;
+  int numeric_sort = 0;
+
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argvp[i], "--version") == 0 || strcmp(argvp[i], "-V") == 0) {
+      printf("pstree version 1.0\n");
+      return 0;
+    } else if (strcmp(argvp[i], "--show-pids") == 0 || strcmp(argvp[i], "-p") == 0) {
+      show_pids = 1;
+    } else if (strcmp(argvp[i], "--numeric-sort") == 0 || strcmp(argvp[i], "-n") == 0) {
+      numeric_sort = 1;
+    } else {
+      fprintf(stderr, "Invalid option: %s\nUsage: pstree [-p] [-n] [-V]\n", argvp[i]);
+      return 1;
+    }
+  }
+
   int* pids = get_all_pids();
   ProcessNode *root = build_tree(pids);
-  print_tree(root, "", 1);
+  print_tree(root, show_pids, numeric_sort, "", 1);
 
   free(pids);
   return 0;
@@ -129,21 +142,35 @@ ProcessNode* build_tree(int *pids) {
   return &nodes[1];
 }
 
-void print_tree(ProcessNode *node, const char *prefix, int is_last) {
+static int cmp_by_pid(const void *a, const void *b) {
+  ProcessNode *pa = *(ProcessNode **)a;
+  ProcessNode *pb = *(ProcessNode **)b;
+  return pa->info.pid - pb->info.pid;
+}
+
+void print_tree(ProcessNode *node, int show_pids, int numeric_sort, const char *prefix, int is_last) {
   if (!node) return;
 
   printf("%s", prefix);
   if (prefix[0] != '\0') {
     printf(is_last ? "`-- " : "+-- ");
   }
-  printf("%s\n", node->info.comm);
-  
+  if (show_pids) {
+    printf("%s (%d)\n", node->info.comm, node->info.pid);
+  } else {
+    printf("%s\n", node->info.comm);
+  }
+
   char new_prefix[256];
   snprintf(new_prefix, sizeof(new_prefix), "%s%s", prefix, is_last ? "    " : "|   ");
 
+  if (numeric_sort && node->child_count > 1) {
+    qsort(node->children, node->child_count, sizeof(ProcessNode *), cmp_by_pid);
+  }
+
   for (size_t i = 0; i < node->child_count; i++) {
     printf("%s|\n", new_prefix);
-    print_tree(node->children[i], new_prefix, i == node->child_count - 1);
+    print_tree(node->children[i], show_pids, numeric_sort, new_prefix, i == node->child_count - 1);
   }
 }
 

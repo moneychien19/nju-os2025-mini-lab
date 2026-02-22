@@ -13,14 +13,11 @@ int main(int argc, char *argvp[]) {
   // }
   
   int* pids = get_all_pids();
-  for (size_t i = 0; pids[i] != 0; i++) {
-    ProcessInfo info;
-    if (get_process_info(pids[i], &info) == 0) {
-      printf("PID: %d, PPID: %d, COMM: %s\n", info.pid, info.ppid, info.comm);
-    }
-  }
+  ProcessNode *root = build_tree(pids);
+  print_tree(root, "", 1);
 
-  return 1;
+  free(pids);
+  return 0;
 }
 
 // 取得 /proc 下的所有 process id
@@ -96,6 +93,60 @@ int get_process_info(int pid, ProcessInfo *info) {
   return 0;
 }
 
+ProcessNode* build_tree(int *pids) {
+  int max_pid = get_max_pid();
+  if (max_pid <= 0) {
+    return NULL;
+  }
+
+  ProcessNode* nodes = malloc(sizeof(ProcessNode) * (max_pid + 1));
+  if (!nodes) {
+    return NULL;
+  }
+  memset(nodes, 0, sizeof(ProcessNode) * (max_pid + 1));
+
+  // Initialize nodes by pid index
+  for (size_t i = 0; pids[i] != 0; i++) {
+    ProcessInfo info;
+    if (get_process_info(pids[i], &info) == 0) {
+      ProcessNode *node = &nodes[info.pid];
+      node->info = info;
+      node->children = NULL;
+      node->child_count = 0;
+      node->child_cap = 0;
+    }
+  }
+
+  // Wire parent-child relationships
+  for (size_t i = 0; pids[i] != 0; i++) {
+    int pid = pids[i];
+    ProcessNode *node = &nodes[pid];
+    int ppid = node->info.ppid;
+    if (ppid > 0 && nodes[ppid].info.pid == ppid) {
+      add_child(&nodes[ppid], node);
+    }
+  }
+  return &nodes[1];
+}
+
+void print_tree(ProcessNode *node, const char *prefix, int is_last) {
+  if (!node) return;
+
+  printf("%s", prefix);
+  if (prefix[0] != '\0') {
+    printf(is_last ? "`-- " : "+-- ");
+  }
+  printf("%s\n", node->info.comm);
+  
+  char new_prefix[256];
+  snprintf(new_prefix, sizeof(new_prefix), "%s%s", prefix, is_last ? "    " : "|   ");
+
+  for (size_t i = 0; i < node->child_count; i++) {
+    printf("%s|\n", new_prefix);
+    print_tree(node->children[i], new_prefix, i == node->child_count - 1);
+  }
+}
+
 char* find_comm(const char *stat_buf) {
   const char *start = strchr(stat_buf, '(');
   const char *end = strrchr(stat_buf, ')');
@@ -121,8 +172,9 @@ int find_ppid(const char *stat_buf) {
     return -1;
   }
 
-  const char *ppid_str = end + 2;
-  return atoi(ppid_str);
+  int ppid;
+  sscanf(end + 2, "%*c %d", &ppid);
+  return ppid;
 }
 
 int is_all_digits(const char *s) {
@@ -137,4 +189,36 @@ int is_all_digits(const char *s) {
   }
   
   return 1;
+}
+
+int get_max_pid() {
+  FILE *f = fopen("/proc/sys/kernel/pid_max", "r");
+  if (!f) {
+    return -1;
+  }
+  
+  int max_pid;
+  if (fscanf(f, "%d", &max_pid) != 1) {
+    fclose(f);
+    return -1;
+  }
+
+  fclose(f);
+  return max_pid;
+}
+
+void add_child(ProcessNode *parent, ProcessNode *child) {
+  if (parent->child_count >= parent->child_cap) {
+    size_t new_cap = parent->child_cap == 0 ? 4 : parent->child_cap * 2;
+    ProcessNode **new_children = realloc(parent->children, new_cap * sizeof(ProcessNode*));
+    
+    if (!new_children) {
+      return;
+    }
+
+    parent->children = new_children;
+    parent->child_cap = new_cap;
+  }
+  
+  parent->children[parent->child_count++] = child;
 }

@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 
             clock_gettime(CLOCK_MONOTONIC, &current_time);
             long elapsed_ms = (current_time.tv_sec - last_time.tv_sec) * 1000 + (current_time.tv_nsec - last_time.tv_nsec) / 1000000;
-            if (elapsed_ms >= 1000) {
+            if (elapsed_ms >= 100) {
                 print_top_syscalls(&stats, TOP_N);
                 last_time = current_time;
             }

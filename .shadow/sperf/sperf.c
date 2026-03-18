@@ -81,6 +81,7 @@ void print_top_syscalls(syscall_stats *stats, int n) {
         printf("%s (%d%%)\n", stats->stats[i].name, ratio);
     }
 
+    printf("==================\n");
     char zeros[80] = {0};
     fwrite(zeros, 1, sizeof(zeros), stdout);
 }

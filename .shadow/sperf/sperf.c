@@ -65,6 +65,23 @@ void add_syscall(syscall_stats *stats, const char *name, double time) {
 }
 
 void print_top_syscalls(syscall_stats *stats, int n) {
+    for (int i = 0; i < stats->count - 1; i++) {
+        for (int j = 0; j < stats->count - i - 1; j++) {
+            if (stats->stats[j].time < stats->stats[j + 1].time) {
+                syscall_stat temp = stats->stats[j];
+                stats->stats[j] = stats->stats[j + 1];
+                stats->stats[j + 1] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < n && i < stats->count; i++) {
+        int ratio = (int)((stats->stats[i].time / stats->total_time) * 100);
+        printf("%s (%d%%)\n", stats->stats[i].name, ratio);
+    }
+
+    char zeros[80] = {0};
+    fwrite(zeros, 1, sizeof(zeros), stdout);
 }
 
 int main(int argc, char *argv[]) {
@@ -118,9 +135,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        for (int i = 0; i < stats.count; i++) {
-            printf("%s: %f seconds\n", stats.stats[i].name, stats.stats[i].time);
-        }
+        print_top_syscalls(&stats, TOP_N);
 
         fclose(fp);
     }

@@ -44,9 +44,24 @@ int parse_strace_line(char *line, char *syscall_name, double *time) {
         return -1;
     }
     regfree(&regex);
+    return 0;
 }
 
 void add_syscall(syscall_stats *stats, const char *name, double time) {
+    if (stats->count >= MAX_SYSCALLS) {
+        return;
+    }
+    for (int i = 0; i < stats->count; i++) {
+        if (strcmp(stats->stats[i].name, name) == 0) {
+            stats->stats[i].time += time;
+            stats->total_time += time;
+            return;
+        }
+    }
+    strncpy(stats->stats[stats->count].name, name, 64);
+    stats->stats[stats->count].time = time;
+    stats->total_time += time;
+    stats->count++;
 }
 
 void print_top_syscalls(syscall_stats *stats, int n) {
@@ -93,12 +108,20 @@ int main(int argc, char *argv[]) {
         // 2. read from the read port
         FILE *fp = fdopen(pipefd[0], "r");
         char line[MAX_SYSCALLS];
+        syscall_stats stats = {0};
+
         while (fgets(line, sizeof(line), fp)) {
             char syscall_name[64];
             double t;
-            parse_strace_line(line, syscall_name, &t);
-            printf("Syscall: %s, Time: %f\n", syscall_name, t);
+            if (parse_strace_line(line, syscall_name, &t) == 0) {
+                add_syscall(&stats, syscall_name, t);
+            }
         }
+
+        for (int i = 0; i < stats.count; i++) {
+            printf("%s: %f seconds\n", stats.stats[i].name, stats.stats[i].time);
+        }
+
         fclose(fp);
     }
 }
